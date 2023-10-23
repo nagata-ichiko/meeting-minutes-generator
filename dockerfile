@@ -19,7 +19,7 @@ RUN pip install --upgrade pip
 
 # ソースファイルのコピー
 COPY requirements.txt /root/
-COPY src/ /root/src/
+COPY main.py /root/
 WORKDIR /root/
 RUN pip install -r requirements.txt
 
@@ -29,4 +29,4 @@ RUN pip install -r requirements.txt
 #     chmod +x /usr/local/lib/python3.9/site-packages/gradio/frpc_linux_aarch64_v0.2
 
 # アプリケーションのコマンドを実行
-CMD ["python", "./src/app.py"]
+CMD ["python", "main.py"]
