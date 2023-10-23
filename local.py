@@ -70,7 +70,7 @@ def excute(api_key, mp4_file_path,model):
     for mp3_file_path in mp3_file_path_list:
         transcription = transcribe_audio(mp3_file_path)
         transcription_list.append(transcription)
-        output_file_path = output_folder + '_transcription.txt'
+        output_file_path = os.path.splitext(mp3_file_path)[0] + '_transcription.txt'
     
     pre_summary = ""
     for transcription_part in transcription_list:
@@ -147,38 +147,17 @@ models = [
 ]
 
 
-# gr.Interface(
-#     title="テキストとファイルの入力",
-#     description="テキストとファイルを入力して処理を実行します。",
-#     inputs=[
-#         gr.inputs.Textbox(label="APIキー"),
-#         gr.inputs.File(label="動画ファイル"),
-#         gr.inputs.Dropdown(label="モデル",choices=models),
-#     ],
-#     outputs=[
-#         gr.outputs.Textbox(label="文字起こしデータ"),
-#         gr.outputs.Textbox(label="議事録データ"),
-#     ],
-#     fn=excute,
-#     ).launch(server_name = "0.0.0.0", server_port=7860)
-
-
-rowdata = gr.outputs.Textbox(label="文字起こしデータ")
-meeting = gr.outputs.Textbox(label="議事録データ")
-
-with gr.Blocks() as app:
-    with gr.Row():
-        with gr.Column():
-            api_key = gr.inputs.Textbox(label="APIキー")
-            # api_button = gr.Button(label="APIキーを確認", type="button")
-            api_list = gr.inputs.Dropdown(label="モデル", choices=models)
-            file = gr.inputs.File(label="動画ファイル")
-            excute_Button = gr.Button(label="実行", type="button")
-            excute_Button.click(excute, [api_key, file, api_list], [rowdata, meeting])      
-        with gr.Column():
-            rowdata.render()
-            meeting.render()
-        
-        
-        
-app.launch(server_name = "0.0.0.0", server_port=7860,share=True)
+gr.Interface(
+    title="テキストとファイルの入力",
+    description="テキストとファイルを入力して処理を実行します。",
+    inputs=[
+        gr.inputs.Textbox(label="APIキー"),
+        gr.inputs.File(label="動画ファイル"),
+        gr.inputs.Dropdown(label="モデル",choices=models),
+    ],
+    outputs=[
+        gr.outputs.Textbox(label="文字起こしデータ"),
+        gr.outputs.Textbox(label="議事録データ"),
+    ],
+    fn=excute,
+    ).launch(server_name = "0.0.0.0", server_port=7860)
