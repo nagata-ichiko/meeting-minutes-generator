@@ -170,7 +170,7 @@ with gr.Blocks() as app:
     with gr.Row():
         with gr.Column():
             api_key = gr.inputs.Textbox(label="APIキー")
-            api_button = gr.Button(label="APIキーを確認", type="button")
+            # api_button = gr.Button(label="APIキーを確認", type="button")
             api_list = gr.inputs.Dropdown(label="モデル", choices=models)
             file = gr.inputs.File(label="動画ファイル")
             excute_Button = gr.Button(label="実行", type="button")
@@ -181,4 +181,4 @@ with gr.Blocks() as app:
         
         
         
-app.launch(server_name = "0.0.0.0", server_port=7860)
+app.launch(server_name = "0.0.0.0", server_port=7860,share=True)
