@@ -160,5 +160,4 @@ gr.Interface(
         gr.outputs.Textbox(label="議事録データ"),
     ],
     fn=excute,
-    live=True,
-    ).launch(server_name = "0.0.0.0", server_port=7860, share=True)
+    ).launch(server_name = "0.0.0.0", server_port=7860)
