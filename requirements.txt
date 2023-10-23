@@ -1,0 +1,7 @@
+gradio
+ffmpeg
+moviepy
+pydub
+srt
+subtitle
+openai
