@@ -12,6 +12,7 @@ import time
 
 # MP4をMP3に変換する（ディスクではなくメモリ上で）
 def convert_mp4_to_mp3(mp4_file_content):
+    print("動画ファイルを変換中です...")
     mp4_io = BytesIO(mp4_file_content)
     audio = mp.AudioFileClip(mp4_io)
     mp3_io = BytesIO()
@@ -21,11 +22,13 @@ def convert_mp4_to_mp3(mp4_file_content):
 
 # 音声を文字起こしする
 def transcribe_audio(mp3_file_content):
+    print("音声ファイルを文字起こし中です...")
     transcription = openai.Audio.transcribe("whisper-1", BytesIO(mp3_file_content), language='ja')
     return transcription.text
 
 # 音声ファイルを分割する
 def split_audio(mp3_file_content, interval_ms):
+    print("音声ファイルを分割中です...")
     audio = AudioSegment.from_file(BytesIO(mp3_file_content))
     audio_segments = []
 
@@ -42,6 +45,7 @@ def split_audio(mp3_file_content, interval_ms):
     return audio_segments
 
 def execute(api_key, mp4_file, model):  # 引数名を変更
+    print("動画ファイルを変換中です...")
     openai.api_key = api_key
     # 利用可能なモデルをチェックする部分は同じなので、そのまま使用します。
 
