@@ -146,19 +146,19 @@ models = [
     'gpt-4-0613'
 ]
 
-def app():
-    gr.Interface(
-        title="テキストとファイルの入力",
-        description="テキストとファイルを入力して処理を実行します。",
-        inputs=[
-            gr.inputs.Textbox(label="APIキー"),
-            gr.inputs.File(label="動画ファイル"),
-            gr.inputs.Dropdown(label="モデル",choices=models),
-        ],
-        outputs=[
-            gr.outputs.Textbox(label="文字起こしデータ"),
-            gr.outputs.Textbox(label="議事録データ"),
-        ],
-        fn=excute,
-        live=True,
-        ).launch(server_name = "0.0.0.0", server_port=7860, share=True)
+
+gr.Interface(
+    title="テキストとファイルの入力",
+    description="テキストとファイルを入力して処理を実行します。",
+    inputs=[
+        gr.inputs.Textbox(label="APIキー"),
+        gr.inputs.File(label="動画ファイル"),
+        gr.inputs.Dropdown(label="モデル",choices=models),
+    ],
+    outputs=[
+        gr.outputs.Textbox(label="文字起こしデータ"),
+        gr.outputs.Textbox(label="議事録データ"),
+    ],
+    fn=excute,
+    live=True,
+    ).launch(server_name = "0.0.0.0", server_port=7860, share=True)
