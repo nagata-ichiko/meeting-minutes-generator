@@ -87,9 +87,6 @@ def execute(api_key, mp4_file, model):  # 引数名を変更
         pre_summary += response['choices'][0]['message']['content']
         time.sleep(60)  # APIのレート制限などに対応するためのウェイト
 
-    # ... [議事録作成部分のコード] ...
-
-    # 直接データを返す
     prompt = """
     あなたは、プロの議事録作成者です。
     以下の制約条件、内容を元に要点をまとめ、議事録を作成してください。
@@ -126,7 +123,16 @@ def get_available_models(api_key):
     return tempmodels
 
 models = [
-    # ... [モデルのリストがここに続く] ...
+    'gpt-3.5-turbo-16k-0613',
+    'gpt-3.5-turbo-16k',
+    'gpt-4',
+    'gpt-4-0314',
+    'gpt-3.5-turbo-0613',
+    'gpt-3.5-turbo-instruct-0914',
+    'gpt-3.5-turbo-0301',
+    'gpt-3.5-turbo-instruct',
+    'gpt-3.5-turbo',
+    'gpt-4-0613'
 ]
 
 gr.Interface(
