@@ -35,3 +35,4 @@ uvicorn main:app --host 0.0.0.0
 
 - local.py はローカル実行用のファイルです。
 - docker compose でも実行できます。実行されるのは Main.py です。local の方は Docker だと動作しません(Gradio の仕様)。
+- 本アプリでは、文字起こし結果と要約を出力します。Main.py は文字起こしと要約を結合して出力します。local.py は文字起こしと要約を別々に出力します。ちょっとみやすい。

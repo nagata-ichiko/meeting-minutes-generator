@@ -152,7 +152,7 @@ with gr.Blocks() as inter:
         ### ローカルで動かすとサクサクです。https://github.com/nagata-ichiko/meeting-minutes-generator
         """
     )
-    with gr.Row(scale=2):
+    with gr.Row():
         with gr.Column():
             api_key = gr.inputs.Textbox(label="APIキー")
             api_list = gr.inputs.Dropdown(label="モデル", choices=models)
