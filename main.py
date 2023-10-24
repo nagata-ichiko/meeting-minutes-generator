@@ -10,28 +10,20 @@ from pydub import AudioSegment
 import time
 from fastapi import FastAPI
 
-def convert_mp4_to_mp3(mp4_file_path,file_name):
+def excute(api_key, mp4_file_path,model):
+    print("処理を開始します...")
+    openai.api_key = api_key
+    if model not in get_available_models(api_key):
+        return "エラー：使用できないモデルです。","エラー：使用できないモデルです。"
+    
     print("mp4ファイルをmp3に変換しています...")
-    mp3_file_path = os.path.splitext(file_name)[0] + '.mp3'
-    audio = mp.AudioFileClip(mp4_file_path)
+    mp3_file_path = os.path.splitext(mp4_file_path.name.split("/")[-1])[0] + '.mp3'
+    audio = mp.AudioFileClip(mp4_file_path.name)
     audio.write_audiofile(mp3_file_path)
-    return mp3_file_path
+    
+    output_folder = "./output/"
+    interval_ms = 480_000 # 60秒 = 60_000ミリ秒
 
-def transcribe_audio(mp3_file_path):
-    print("文字起こしをしています...")
-    with open(mp3_file_path, 'rb') as audio_file:
-        transcription = openai.Audio.transcribe("whisper-1", audio_file, language='ja')
-
-    return transcription.text
-
-#テキストを保存
-def save_text_to_file(text, output_file_path):
-    print("テキストを保存しています...")
-    with open(output_file_path, 'w', encoding='utf-8') as f:
-        f.write(text)
-
-#mp3ファイルを分割し、保存し、ファイルリストを返す
-def split_audio(mp3_file_path, interval_ms, output_folder):
     print("音声ファイルを分割しています...")
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -54,28 +46,14 @@ def split_audio(mp3_file_path, interval_ms, output_folder):
 
         #音声ファイルリストに追加
         mp3_file_path_list.append(output_file_name)
-
-    #音声ファイルリストを出力
-    return mp3_file_path_list
-
-def excute(api_key, mp4_file_path,model):
-    print("処理を開始します...")
-    openai.api_key = api_key
-    if model not in get_available_models(api_key):
-        return "エラー：使用できないモデルです。","エラー：使用できないモデルです。"
-
-    file_path = mp4_file_path.name
-    file_name = mp4_file_path.name.split("/")[-1]
-    mp3_file_path = convert_mp4_to_mp3(file_path,file_name)
-
-    output_folder = "./output/"
-    interval_ms = 480_000 # 60秒 = 60_000ミリ秒
-
-    mp3_file_path_list = split_audio(mp3_file_path, interval_ms, output_folder)
+    
     transcription_list = []
     for mp3_file_path in mp3_file_path_list:
-        transcription = transcribe_audio(mp3_file_path)
-        transcription_list.append(transcription)
+        transcription = ""
+        print("文字起こしをしています...")
+        with open(mp3_file_path, 'rb') as audio_file:
+            transcription = openai.Audio.transcribe("whisper-1", audio_file, language='ja')
+        transcription_list.append(transcription.text)
         output_file_path = output_folder + '_transcription.txt'
     
     pre_summary = ""
@@ -125,8 +103,10 @@ def excute(api_key, mp4_file_path,model):
     )
     output_row_file_path = output_folder + '_RowData.txt'
     output_file_path = output_folder + '_mitunes.txt'
-    save_text_to_file(response['choices'][0]['message']['content'], output_file_path)
-    save_text_to_file(pre_summary, output_row_file_path)
+    with open(output_file_path, 'w', encoding='utf-8') as f:
+        f.write(response['choices'][0]['message']['content'])
+    with open(output_row_file_path, 'w', encoding='utf-8') as f:
+        f.write(transcription_list)
     # return transcription_list,response['choices'][0]['message']['content']
     return response['choices'][0]['message']['content']
     
