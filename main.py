@@ -101,7 +101,7 @@ def excute(api_key, mp4_file_path,model):
         temperature=0.0,
     )
     print("処理が完了しました。")
-    return  "\n\n\n".join([transcription_list, response['choices'][0]['message']['content']])
+    return  response['choices'][0]['message']['content']
     
 def get_available_models(api_key):
     openai.api_key = api_key
