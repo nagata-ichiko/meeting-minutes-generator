@@ -29,4 +29,4 @@ RUN pip install -r requirements.txt
 #     chmod +x /usr/local/lib/python3.9/site-packages/gradio/frpc_linux_aarch64_v0.2
 
 # アプリケーションのコマンドを実行
-CMD ["python", "main.py"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0"]
