@@ -94,8 +94,6 @@ def excute(api_key, mp4_file_path,model):
         )   
         pre_summary += response['choices'][0]['message']['content']
 
-        time.sleep(60)
-
     prompt = """
     あなたは、プロの議事録作成者です。
     以下の制約条件、内容を元に要点をまとめ、議事録を作成してください。
