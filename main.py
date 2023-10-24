@@ -19,19 +19,23 @@ def excute(api_key, mp4_file_path,model):
     print("mp4ファイルをmp3に変換しています...")
     mp3_file_path = os.path.splitext(mp4_file_path.name.split("/")[-1])[0] + '.mp3'
     audio = mp.AudioFileClip(mp4_file_path.name)
+    print("変換が完了しました。ファイルを作成します...")
     audio.write_audiofile(mp3_file_path)
     
     output_folder = "./output/"
     interval_ms = 480_000 # 60秒 = 60_000ミリ秒
 
-    print("音声ファイルを分割しています...")
+    print("outputフォルダを作成します...")
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
+    print("Audioファイルを取得します...")
     audio = AudioSegment.from_file(mp3_file_path)
+    print("分割用のファイル名を取得します...")
     file_name, ext = os.path.splitext(os.path.basename(mp3_file_path))
 
     mp3_file_path_list = []
 
+    print("音声ファイルを分割しています...")
     n_splits = len(audio) // interval_ms
     for i in range(n_splits + 1):
         #開始、終了時間
