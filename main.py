@@ -57,6 +57,8 @@ def excute(api_key, mp4_file_path,model):
         output_file_path = output_folder + '_transcription.txt'
     
     pre_summary = ""
+    
+    print("議事録を作成中です...")
     for transcription_part in transcription_list:
         prompt = """
         あなたは、プロの要約作成者です。
@@ -79,7 +81,6 @@ def excute(api_key, mp4_file_path,model):
         pre_summary += response['choices'][0]['message']['content']
 
         time.sleep(60)
-    print("要約を作成中です...")
     prompt = """
     あなたは、プロの議事録作成者です。
     以下の制約条件、内容を元に要点をまとめ、議事録を作成してください。
@@ -91,11 +92,10 @@ def excute(api_key, mp4_file_path,model):
 
     # 内容
     """ + pre_summary
-
-
-    print("議事録を作成中です...")
+    
+    print("要約を作成中です...")
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model=model,
         messages=[
             {'role': 'user', 'content': prompt}
         ],
