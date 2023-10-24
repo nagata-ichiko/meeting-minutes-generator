@@ -126,10 +126,7 @@ models = [
     'gpt-4-0613'
 ]
 
-
-# rowdata = gr.outputs.Textbox(label="文字起こし生データ")
 meeting = gr.outputs.Textbox(label="議事録データ")
-
 with gr.Blocks() as inter:
     with gr.Row():
         with gr.Column():
@@ -139,7 +136,6 @@ with gr.Blocks() as inter:
             excute_Button = gr.Button(label="実行", type="button")
             excute_Button.click(excute, [api_key, file, api_list], meeting)      
         with gr.Column():
-            # rowdata.render()
             meeting.render()
         
 app = FastAPI()
