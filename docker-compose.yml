@@ -1,0 +1,16 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    container_name: "meeting-minutes-generator"
+    expose:
+      - "8000"
+    working_dir: "/root/"
+    tty: true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/root/
+    # command: sh -c 'pip install --upgrade pip && pip install -r requirements.txt'

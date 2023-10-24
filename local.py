@@ -117,11 +117,14 @@ def excute(api_key, mp4_file_path,model):
         ],
         temperature=0.0,
     )
+    result ="[文字起こし結果]"    
+    for i in transcription_list:
+        result += i + "\n"
     output_row_file_path = output_folder + '_RowData.txt'
     output_file_path = output_folder + '_mitunes.txt'
     save_text_to_file(response['choices'][0]['message']['content'], output_file_path)
-    save_text_to_file(pre_summary, output_row_file_path)
-    return transcription_list,response['choices'][0]['message']['content']
+    save_text_to_file(result, output_row_file_path)
+    return result,response['choices'][0]['message']['content']
     
 def get_available_models(api_key):
     openai.api_key = api_key

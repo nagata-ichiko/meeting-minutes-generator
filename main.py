@@ -1,16 +1,12 @@
 from multiprocessing.sharedctypes import Value
 import gradio as gr 
 from datetime import timedelta
-from srt import Subtitle
-import srt
 import os
 import openai
 import moviepy.editor as mp
 from pydub import AudioSegment
 import time
 from fastapi import FastAPI
-import io
-import tempfile 
 
 def excute(api_key, mp4_file_path,model):
     print("処理を開始します...")
@@ -145,23 +141,26 @@ models = [
 ]
 
 meeting = gr.outputs.Textbox(label="議事録データ")
+
 with gr.Blocks() as inter:
     caption = gr.Markdown(
         """
         ### 動画や音声を元に会議録を自動生成するためのアプリです。
         ### 注意事項：このアプリは、OpenAIのAPIキーが必要です。APIキーを入力してください。
-        ### サーバーのメモリが512Mなのでそれ以下のファイルを使用してください(200Mまでは動作確認済み)。大きいファイルだと正常に動作しない場合があります。音声ファイルがおすすめです。
+        ### サーバーのメモリが少ないため、ファイルサイズに制限があります。40M以下のファイルを使用してください。(50Mまでは動作しましたが、8割がたサーバーが落ちます)。
+        ### 20Mくらいの音声ファイルがおすすめです。大きくても50Mくらい
         ### 無料サーバーなのでちょっと重いです。反応をちょっとだけ待ってください。
+        ### ローカルで動かすとサクサクです。https://github.com/nagata-ichiko/meeting-minutes-generator
         """
     )
-    with gr.Row():
+    with gr.Row(scale=2):
         with gr.Column():
             api_key = gr.inputs.Textbox(label="APIキー")
             api_list = gr.inputs.Dropdown(label="モデル", choices=models)
             file = gr.inputs.File(label="動画ファイル")
             excute_Button = gr.Button(value="実行", type="button")
             excute_Button.click(excute, [api_key, file, api_list], meeting)      
-        with gr.Column():
+        with gr.Row(scale=2):
             meeting.render()
 
 app = FastAPI()

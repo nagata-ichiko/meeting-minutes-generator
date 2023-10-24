@@ -32,3 +32,6 @@ python local.py
 ```
 uvicorn main:app --host 0.0.0.0
 ```
+
+- local.py はローカル実行用のファイルです。
+- docker compose でも実行できます。実行されるのは Main.py です。local の方は Docker だと動作しません(Gradio の仕様)。
