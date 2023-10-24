@@ -9,6 +9,8 @@ import moviepy.editor as mp
 from pydub import AudioSegment
 import time
 from fastapi import FastAPI
+import io
+import tempfile 
 
 def excute(api_key, mp4_file_path,model):
     print("処理を開始します...")
@@ -17,49 +19,79 @@ def excute(api_key, mp4_file_path,model):
         return "エラー：使用できないモデルです。","エラー：使用できないモデルです。"
     
     print("mp4ファイルをmp3に変換しています...")
-    mp3_file_path = os.path.splitext(mp4_file_path.name.split("/")[-1])[0] + '.mp3'
-    audio = mp.AudioFileClip(mp4_file_path.name)
+    format = os.path.splitext(mp4_file_path.name.split("/")[-1])[1].replace(".", "")
+    print(format)
+    audio_clip = AudioSegment.from_file(mp4_file_path.name, format=format)
+    # メモリ上で分割されたオーディオデータを保持するリスト
+    audio_segments_bytes = []
+    # mp3_file_path = os.path.splitext(mp4_file_path.name.split("/")[-1])[0] + '.mp3'
+    # audio = mp.AudioFileClip(mp4_file_path.name)
     print("変換が完了しました。ファイルを作成します...")
-    audio.write_audiofile(mp3_file_path)
+    # audio.write_audiofile(mp3_file_path)
+    # audio_data = audio.to_soundarray(fps=22050, nbytes=2, buffersize=2000)  # 適切なパラメーターに調整する必要があるかもしれません
     
-    output_folder = "./output/"
+    # output_folder = "./output/"
     interval_ms = 480_000 # 60秒 = 60_000ミリ秒
 
-    print("outputフォルダを作成します...")
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-    print("Audioファイルを取得します...")
-    audio = AudioSegment.from_file(mp3_file_path)
-    print("分割用のファイル名を取得します...")
-    file_name, ext = os.path.splitext(os.path.basename(mp3_file_path))
+    # print("outputフォルダを作成します...")
+    # if not os.path.exists(output_folder):
+    #     os.makedirs(output_folder)
+    # print("Audioファイルを取得します...")
+    # audio = AudioSegment.from_file(mp3_file_path)
+    # print("分割用のファイル名を取得します...")
+    # file_name, ext = os.path.splitext(os.path.basename(mp3_file_path))
 
-    mp3_file_path_list = []
+    # mp3_file_path_list = []
 
     print("音声ファイルを分割しています...")
-    n_splits = len(audio) // interval_ms
+    n_splits = len(audio_clip) // interval_ms
     for i in range(n_splits + 1):
         #開始、終了時間
         start = i * interval_ms
         end = (i + 1) * interval_ms
         #分割
-        split = audio[start:end]
-        #出力ファイル名
-        output_file_name = output_folder + os.path.splitext(mp3_file_path)[0] + "_" + str(i) + ".mp3"
-        #出力
-        split.export(output_file_name, format="mp3")
+        split_audio = audio_clip[start:end]
+        
+        buffer = io.BytesIO()
+        split_audio.export(buffer, format="mp3")
+        audio_segments_bytes.append(buffer.getvalue())
+        # audio_byte_data = split.raw_data  # splitはAudioSegmentオブジェクト
+        # print("文字起こしをしています...")
+        # transcription = openai.Audio.transcribe("whisper-1", audio_byte_data, language='ja')
+        # transcription_list.append(transcription.text)
+        # #出力ファイル名
+        # output_file_name = output_folder + os.path.splitext(mp3_file_path)[0] + "_" + str(i) + ".mp3"
+        # #出力
+        # split.export(output_file_name, format="mp3")
 
-        #音声ファイルリストに追加
-        mp3_file_path_list.append(output_file_name)
+        # #音声ファイルリストに追加
+        # mp3_file_path_list.append(output_file_name)
     
+
+    # for mp3_file_path in mp3_file_path_list:
+    #     transcription = ""
+    #     print("文字起こしをしています...")
+    #     with open(mp3_file_path, 'rb') as audio_file:
+    #         transcription = openai.Audio.transcribe("whisper-1", audio_file, language='ja')
+    #     transcription_list.append(transcription.text)
+    #     output_file_path = output_folder + '_transcription.txt'
+    
+    print("文字起こしをしています...")
     transcription_list = []
-    for mp3_file_path in mp3_file_path_list:
+    for audio_bytes in audio_segments_bytes:
         transcription = ""
-        print("文字起こしをしています...")
-        with open(mp3_file_path, 'rb') as audio_file:
-            transcription = openai.Audio.transcribe("whisper-1", audio_file, language='ja')
-        transcription_list.append(transcription.text)
-        output_file_path = output_folder + '_transcription.txt'
-    
+
+        # 一時ファイルを使用して物理ファイルを作成します。
+        with tempfile.NamedTemporaryFile(suffix=".mp3") as temp_audio_file:
+            temp_audio_file.write(audio_bytes)
+            temp_audio_file.flush()  # ディスクに書き込む
+            # 一時ファイルを開き直す
+            with open(temp_audio_file.name, 'rb') as file_obj:
+                # ファイルオブジェクトをtranscribeメソッドに渡す
+                transcription = openai.Audio.transcribe("whisper-1", file_obj, language='ja')
+
+    transcription_list.append(transcription.text)
+
     pre_summary = ""
     
     print("議事録を作成中です...")
@@ -105,14 +137,14 @@ def excute(api_key, mp4_file_path,model):
         ],
         temperature=0.0,
     )
-    output_row_file_path = output_folder + '_RowData.txt'
-    output_file_path = output_folder + '_mitunes.txt'
-    with open(output_file_path, 'w', encoding='utf-8') as f:
-        f.write(response['choices'][0]['message']['content'])
+    # output_row_file_path = output_folder + '_RowData.txt'
+    # output_file_path = output_folder + '_mitunes.txt'
+    # with open(output_file_path, 'w', encoding='utf-8') as f:
+    #     f.write(response['choices'][0]['message']['content'])
         
-    with open(output_row_file_path, 'w', encoding='utf-8') as f:
-        transcriptions_str = "\n".join(transcription_list)
-        f.write(transcriptions_str)
+    # with open(output_row_file_path, 'w', encoding='utf-8') as f:
+    #     transcriptions_str = "\n".join(transcription_list)
+    #     f.write(transcriptions_str)
     # return transcription_list,response['choices'][0]['message']['content']
     return response['choices'][0]['message']['content']
     
@@ -141,7 +173,7 @@ models = [
 
 meeting = gr.outputs.Textbox(label="議事録データ")
 
-with gr.Blocks() as io:
+with gr.Blocks() as inter:
     with gr.Row():
         with gr.Column():
             api_key = gr.inputs.Textbox(label="APIキー")
@@ -171,5 +203,5 @@ with gr.Blocks() as io:
 #     )
         
 app = FastAPI()
-app = gr.mount_gradio_app(app, io,path="/")
+app = gr.mount_gradio_app(app, inter,path="/")
 # app.launch(server_name = "0.0.0.0", server_port=7860,share=True,debug=True)
