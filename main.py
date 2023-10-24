@@ -11,12 +11,14 @@ import time
 from fastapi import FastAPI
 
 def convert_mp4_to_mp3(mp4_file_path,file_name):
+    print("mp4ファイルをmp3に変換しています...")
     mp3_file_path = os.path.splitext(file_name)[0] + '.mp3'
     audio = mp.AudioFileClip(mp4_file_path)
     audio.write_audiofile(mp3_file_path)
     return mp3_file_path
 
 def transcribe_audio(mp3_file_path):
+    print("文字起こしをしています...")
     with open(mp3_file_path, 'rb') as audio_file:
         transcription = openai.Audio.transcribe("whisper-1", audio_file, language='ja')
 
@@ -24,11 +26,13 @@ def transcribe_audio(mp3_file_path):
 
 #テキストを保存
 def save_text_to_file(text, output_file_path):
+    print("テキストを保存しています...")
     with open(output_file_path, 'w', encoding='utf-8') as f:
         f.write(text)
 
 #mp3ファイルを分割し、保存し、ファイルリストを返す
 def split_audio(mp3_file_path, interval_ms, output_folder):
+    print("音声ファイルを分割しています...")
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     audio = AudioSegment.from_file(mp3_file_path)
@@ -55,8 +59,7 @@ def split_audio(mp3_file_path, interval_ms, output_folder):
     return mp3_file_path_list
 
 def excute(api_key, mp4_file_path,model):
-    if not os.path.exists("hogehoge"):
-        os.makedirs("hogehoge")
+    print("処理を開始します...")
     openai.api_key = api_key
     if model not in get_available_models(api_key):
         return "エラー：使用できないモデルです。","エラー：使用できないモデルです。"
@@ -98,7 +101,7 @@ def excute(api_key, mp4_file_path,model):
         pre_summary += response['choices'][0]['message']['content']
 
         time.sleep(60)
-
+    print("要約を作成中です...")
     prompt = """
     あなたは、プロの議事録作成者です。
     以下の制約条件、内容を元に要点をまとめ、議事録を作成してください。
@@ -150,19 +153,36 @@ models = [
     'gpt-4-0613'
 ]
 
+meeting = gr.outputs.Textbox(label="議事録データ")
 
-io = gr.Interface(title="テキストとファイルの入力",description="テキストとファイルを入力して処理を実行します。",
-    inputs=[
-        gr.inputs.Textbox(label="APIキー"),
-        gr.inputs.File(label="動画ファイル"),
-        gr.inputs.Dropdown(label="モデル",choices=models),
-    ],
-    outputs=[
-        gr.outputs.Textbox(label="文字起こしデータ"),
-        gr.outputs.Textbox(label="議事録データ"),
-    ],
-    fn=excute,
-    )
+with gr.Blocks() as io:
+    with gr.Row():
+        with gr.Column():
+            api_key = gr.inputs.Textbox(label="APIキー")
+            # api_button = gr.Button(label="APIキーを確認", type="button")
+            api_list = gr.inputs.Dropdown(label="モデル", choices=models)
+            file = gr.inputs.File(label="動画ファイル")
+            excute_Button = gr.Button(label="実行", type="button")
+            excute_Button.click(excute, [api_key, file, api_list], meeting)      
+            # excute_Button.click(excute, [api_key, file, api_list], [rowdata, meeting])      
+        with gr.Column():
+            # rowdata.render()
+            meeting.render()
+
+
+
+# io = gr.Interface(title="テキストとファイルの入力",description="テキストとファイルを入力して処理を実行します。",
+#     inputs=[
+#         gr.inputs.Textbox(label="APIキー"),
+#         gr.inputs.File(label="動画ファイル"),
+#         gr.inputs.Dropdown(label="モデル",choices=models),
+#     ],
+#     outputs=[
+#         gr.outputs.Textbox(label="文字起こしデータ"),
+#         gr.outputs.Textbox(label="議事録データ"),
+#     ],
+#     fn=excute,
+#     )
         
 app = FastAPI()
 app = gr.mount_gradio_app(app, io,path="/")
