@@ -13,6 +13,7 @@ def convert_mp4_to_mp3(mp4_file_path,file_name):
     mp3_file_path = os.path.splitext(file_name)[0] + '.mp3'
     audio = mp.AudioFileClip(mp4_file_path)
     audio.write_audiofile(mp3_file_path)
+    audio_data = audio.to_soundarray(fps=22050, nbytes=2, buffersize=2000)  # 適切なパラメーターに調整する必要があるかもしれません
     return mp3_file_path
 
 def transcribe_audio(mp3_file_path):
