@@ -160,27 +160,8 @@ io = gr.Interface(title="テキストとファイルの入力",description="テ�
         gr.outputs.Textbox(label="議事録データ"),
     ],
     fn=excute,
-    ).launch(server_name = "0.0.0.0", server_port=7860)
-
-
-# rowdata = gr.outputs.Textbox(label="文字起こしデータ")
-# meeting = gr.outputs.Textbox(label="議事録データ")
-
-# with gr.Blocks() as app:
-#     with gr.Row():
-#         with gr.Column():
-#             api_key = gr.inputs.Textbox(label="APIキー")
-#             # api_button = gr.Button(label="APIキーを確認", type="button")
-#             api_list = gr.inputs.Dropdown(label="モデル", choices=models)
-#             file = gr.inputs.File(label="動画ファイル")
-#             excute_Button = gr.Button(label="実行", type="button")
-#             excute_Button.click(excute, [api_key, file, api_list], meeting)      
-#             # excute_Button.click(excute, [api_key, file, api_list], [rowdata, meeting])      
-#         with gr.Column():
-#             # rowdata.render()
-#             meeting.render()
+    )
         
-aplication = FastAPI()
-        
-aplication = gr.mount_gradio_app(aplication, io,path="/")
+app = FastAPI()
+app = gr.mount_gradio_app(app, io,path="/")
 # app.launch(server_name = "0.0.0.0", server_port=7860,share=True,debug=True)
