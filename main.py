@@ -105,8 +105,10 @@ def excute(api_key, mp4_file_path,model):
     output_file_path = output_folder + '_mitunes.txt'
     with open(output_file_path, 'w', encoding='utf-8') as f:
         f.write(response['choices'][0]['message']['content'])
+        
     with open(output_row_file_path, 'w', encoding='utf-8') as f:
-        f.write(transcription_list)
+        transcriptions_str = "\n".join(transcription_list)
+        f.write(transcriptions_str)
     # return transcription_list,response['choices'][0]['message']['content']
     return response['choices'][0]['message']['content']
     
