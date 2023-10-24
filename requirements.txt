@@ -6,3 +6,4 @@ srt
 subtitle
 openai
 pydantic==1.10.11
+fastapi

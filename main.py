@@ -8,6 +8,7 @@ import openai
 import moviepy.editor as mp
 from pydub import AudioSegment
 import time
+from fastapi import FastAPI
 
 def convert_mp4_to_mp3(mp4_file_path,file_name):
     mp3_file_path = os.path.splitext(file_name)[0] + '.mp3'
@@ -148,39 +149,38 @@ models = [
 ]
 
 
-# gr.Interface(
-#     title="テキストとファイルの入力",
-#     description="テキストとファイルを入力して処理を実行します。",
-#     inputs=[
-#         gr.inputs.Textbox(label="APIキー"),
-#         gr.inputs.File(label="動画ファイル"),
-#         gr.inputs.Dropdown(label="モデル",choices=models),
-#     ],
-#     outputs=[
-#         gr.outputs.Textbox(label="文字起こしデータ"),
-#         gr.outputs.Textbox(label="議事録データ"),
-#     ],
-#     fn=excute,
-#     ).launch(server_name = "0.0.0.0", server_port=7860)
+io = gr.Interface(title="テキストとファイルの入力",description="テキストとファイルを入力して処理を実行します。",
+    inputs=[
+        gr.inputs.Textbox(label="APIキー"),
+        gr.inputs.File(label="動画ファイル"),
+        gr.inputs.Dropdown(label="モデル",choices=models),
+    ],
+    outputs=[
+        gr.outputs.Textbox(label="文字起こしデータ"),
+        gr.outputs.Textbox(label="議事録データ"),
+    ],
+    fn=excute,
+    ).launch(server_name = "0.0.0.0", server_port=7860)
 
 
 # rowdata = gr.outputs.Textbox(label="文字起こしデータ")
-meeting = gr.outputs.Textbox(label="議事録データ")
+# meeting = gr.outputs.Textbox(label="議事録データ")
 
-with gr.Blocks() as app:
-    with gr.Row():
-        with gr.Column():
-            api_key = gr.inputs.Textbox(label="APIキー")
-            # api_button = gr.Button(label="APIキーを確認", type="button")
-            api_list = gr.inputs.Dropdown(label="モデル", choices=models)
-            file = gr.inputs.File(label="動画ファイル")
-            excute_Button = gr.Button(label="実行", type="button")
-            excute_Button.click(excute, [api_key, file, api_list], meeting)      
-            # excute_Button.click(excute, [api_key, file, api_list], [rowdata, meeting])      
-        with gr.Column():
-            # rowdata.render()
-            meeting.render()
+# with gr.Blocks() as app:
+#     with gr.Row():
+#         with gr.Column():
+#             api_key = gr.inputs.Textbox(label="APIキー")
+#             # api_button = gr.Button(label="APIキーを確認", type="button")
+#             api_list = gr.inputs.Dropdown(label="モデル", choices=models)
+#             file = gr.inputs.File(label="動画ファイル")
+#             excute_Button = gr.Button(label="実行", type="button")
+#             excute_Button.click(excute, [api_key, file, api_list], meeting)      
+#             # excute_Button.click(excute, [api_key, file, api_list], [rowdata, meeting])      
+#         with gr.Column():
+#             # rowdata.render()
+#             meeting.render()
         
+aplication = FastAPI()
         
-        
-app.launch(server_name = "0.0.0.0", server_port=7860,share=True,debug=True)
+aplication = gr.mount_gradio_app(aplication, io,path="/")
+# app.launch(server_name = "0.0.0.0", server_port=7860,share=True,debug=True)
