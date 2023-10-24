@@ -55,6 +55,8 @@ def split_audio(mp3_file_path, interval_ms, output_folder):
     return mp3_file_path_list
 
 def excute(api_key, mp4_file_path,model):
+    if not os.path.exists("hogehoge"):
+        os.makedirs("hogehoge")
     openai.api_key = api_key
     if model not in get_available_models(api_key):
         return "エラー：使用できないモデルです。","エラー：使用できないモデルです。"
