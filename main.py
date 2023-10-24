@@ -21,39 +21,38 @@ def excute(api_key, mp4_file_path,model):
     print("mp4ファイルをmp3に変換しています...")
     format = os.path.splitext(mp4_file_path.name.split("/")[-1])[1].replace(".", "")
     print(format)
-    audio_clip = AudioSegment.from_file(mp4_file_path.name, format=format)
-    audio_segments_bytes = []
+    audio = AudioSegment.from_file(mp4_file_path.name, format=format)
     print("変換が完了しました。ファイルを作成します...")
-    interval_ms = 480_000 # 60秒 = 60_000ミリ秒
+
+    output_folder = "./output/"
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
     print("音声ファイルを分割しています...")
-    n_splits = len(audio_clip) // interval_ms
+    interval_ms = 480_000 # 60秒 = 60_000ミリ秒    
+    mp3_file_path_list = []
+    n_splits = len(audio) // interval_ms
     for i in range(n_splits + 1):
         #開始、終了時間
         start = i * interval_ms
         end = (i + 1) * interval_ms
         #分割
-        split_audio = audio_clip[start:end]
+        split = audio[start:end]
+        #出力ファイル名
+        output_file_name = output_folder +  os.path.splitext(mp4_file_path.name.split("/")[-1])[0] + "_" + str(i) + ".mp3"
+        #出力
+        split.export(output_file_name, format="mp3")
+
+        #音声ファイルリストに追加
+        mp3_file_path_list.append(output_file_name)
         
-        buffer = io.BytesIO()
-        split_audio.export(buffer, format="mp3")
-        audio_segments_bytes.append(buffer.getvalue())
-    
+    del audio
     print("文字起こしをしています...")
     transcription_list = []
-    for audio_bytes in audio_segments_bytes:
-        transcription = ""
-
-        # 一時ファイルを使用して物理ファイルを作成します。
-        with tempfile.NamedTemporaryFile(suffix=".mp3") as temp_audio_file:
-            temp_audio_file.write(audio_bytes)
-            temp_audio_file.flush()  # ディスクに書き込む
-            # 一時ファイルを開き直す
-            with open(temp_audio_file.name, 'rb') as file_obj:
-                # ファイルオブジェクトをtranscribeメソッドに渡す
-                transcription = openai.Audio.transcribe("whisper-1", file_obj, language='ja')
-
-    transcription_list.append(transcription.text)
+    for mp3_file_path in mp3_file_path_list:
+        with open(mp3_file_path, 'rb') as audio_file:
+            transcription = openai.Audio.transcribe("whisper-1", audio_file, language='ja')
+        transcription_list.append(transcription.text)
 
     pre_summary = ""
     
@@ -101,8 +100,25 @@ def excute(api_key, mp4_file_path,model):
         temperature=0.0,
     )
     print("処理が完了しました。")
-    # result = "\n\n\n".join([transcription_list, response['choices'][0]['message']['content']])
-    return  response['choices'][0]['message']['content']
+
+    result ="[文字起こし結果]"    
+    for i in transcription_list:
+        result += i + "\n"
+        
+    result += response['choices'][0]['message']['content']
+    
+    print("ファイルを削除します")
+    try:
+        os.remove(mp4_file_path.name)
+        for root, dirs, files in os.walk(output_folder):
+            for file in files:
+                os.remove(os.path.join(root, file))
+        
+    except Exception as e:
+        print(f"Error deleting original video file {mp4_file_path}: {e}")
+    
+    return result
+    # return  response['choices'][0]['message']['content']
     
 def get_available_models(api_key):
     openai.api_key = api_key
@@ -129,15 +145,23 @@ models = [
 
 meeting = gr.outputs.Textbox(label="議事録データ")
 with gr.Blocks() as inter:
+    caption = gr.Markdown(
+        """
+        ### 動画や音声を元に会議録を自動生成するためのアプリです。
+        ### 注意事項：このアプリは、OpenAIのAPIキーが必要です。APIキーを入力してください。
+        ### サーバーのメモリが512MなのでそれM以下のファイルを使用してください(200Mまでは動作確認済み)。大きいファイルだと正常に動作しない場合があります。音声ファイルがおすすめです。
+        ### 無料サーバーなのでちょっと重いです。反応をちょっとだけ待ってください。
+        """
+    )
     with gr.Row():
         with gr.Column():
             api_key = gr.inputs.Textbox(label="APIキー")
             api_list = gr.inputs.Dropdown(label="モデル", choices=models)
             file = gr.inputs.File(label="動画ファイル")
-            excute_Button = gr.Button(label="実行", type="button")
+            excute_Button = gr.Button(value="実行", type="button")
             excute_Button.click(excute, [api_key, file, api_list], meeting)      
         with gr.Column():
             meeting.render()
-        
+
 app = FastAPI()
 app = gr.mount_gradio_app(app, inter,path="/")
