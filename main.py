@@ -101,7 +101,7 @@ def excute(api_key, mp4_file_path,model):
         temperature=0.0,
     )
 
-    return  "\n".join(transcription_list),response['choices'][0]['message']['content']
+    return  "\n\n\n".join([transcription_list, response['choices'][0]['message']['content']])
     
 def get_available_models(api_key):
     openai.api_key = api_key
@@ -127,7 +127,7 @@ models = [
 ]
 
 
-rowdata = gr.outputs.Textbox(label="文字起こし生データ")
+# rowdata = gr.outputs.Textbox(label="文字起こし生データ")
 meeting = gr.outputs.Textbox(label="議事録データ")
 
 with gr.Blocks() as inter:
@@ -137,9 +137,9 @@ with gr.Blocks() as inter:
             api_list = gr.inputs.Dropdown(label="モデル", choices=models)
             file = gr.inputs.File(label="動画ファイル")
             excute_Button = gr.Button(label="実行", type="button")
-            excute_Button.click(excute, [api_key, file, api_list], [rowdata, meeting])      
+            excute_Button.click(excute, [api_key, file, api_list], meeting)      
         with gr.Column():
-            rowdata.render()
+            # rowdata.render()
             meeting.render()
         
 app = FastAPI()
