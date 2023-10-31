@@ -117,10 +117,6 @@ def get_available_models(api_key):
             
     return gr.Dropdown.update(choices=tempmodels,interactive=True,value=tempmodels[0])
 
-
-
-
-
 transcription_out = gr.Textbox(label="文字起こし結果")
 presummary_prompt = """
 あなたは、プロの要約作成者です。
@@ -137,7 +133,7 @@ summary_prompt = """
 ・要点をまとめ、簡潔に書いて下さい。
 ・誤字・脱字があるため、話の内容を予測して置き換えてください。
 ・見やすいフォーマットにしてください。
-・決まったこと、決めたことについては箇条書きで、明確に記載してください。省略は許しません。  
+・決まったこと、決めたことについては明確に記載してください。次のアクションがわからないと困ります。  
 """
 
 
