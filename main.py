@@ -7,8 +7,9 @@ import moviepy.editor as mp
 from pydub import AudioSegment
 import time
 from fastapi import FastAPI
+from dotenv import load_dotenv
 
-
+load_dotenv()
 pre_summary = ""
 output_folder = "./output/"
 def transcription_excute(api_key, mp4_file_path,model):
@@ -136,6 +137,13 @@ summary_prompt = """
 ・決まったこと、決めたことについては明確に記載してください。次のアクションがわからないと困ります。  
 """
 
+api_key_String =  os.environ.get("OPEN_AI_APIKEY")
+openai.api_key = api_key_String
+tempmodels = []
+response = openai.Model.list()
+for model in response['data']:
+    if 'gpt' in model['id']:
+        tempmodels.append(model['id'])
 
 with gr.Blocks() as inter:
     caption = gr.Markdown(
@@ -146,10 +154,10 @@ with gr.Blocks() as inter:
         """
     )
     with gr.Column():
-        api_key = gr.Textbox(label="APIキー")
-        api_button = gr.Button(value="APIキーを確認する", type="button")
-        api_list = gr.Dropdown(label="モデル", choices=None,interactive=True,value="APIキーを確認してください")
-        api_button.click(get_available_models, api_key,api_list)
+        api_key = gr.Textbox(label="APIキー",value=api_key_String,interactive=True,visible=False)
+        # api_button = gr.Button(value="APIキーを確認する", type="button")
+        api_list = gr.Dropdown(label="モデル", choices=tempmodels,interactive=True,value="Modelを選択してください")
+        # api_button.click(get_available_models, inputs=[api_key],outputs=api_list)
     with gr.Row():
         with gr.Row():
             pre_summary_text =gr.Textbox(label="要約を作成する前処理用のプロンプト",interactive=True,value=presummary_prompt)
