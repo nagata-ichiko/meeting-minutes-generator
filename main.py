@@ -149,6 +149,7 @@ with gr.Blocks() as inter:
     caption = gr.Markdown(
         """
         ##### 動画や音声を元に会議録を自動生成するためのアプリです。
+        ##### Modelはgpt-4がおすすめです。精度を上げたい時やうまくいかない時はgpt-4-1106-previewをおすすめします。
         ##### 音声ファイルがおすすめです。ファイルの容量は軽い方が良いです
         """
     )
@@ -162,7 +163,7 @@ with gr.Blocks() as inter:
             pre_summary_text =gr.Textbox(label="要約を作成する前処理用のプロンプト",interactive=True,value=presummary_prompt)
             summary_text =gr.Textbox(label="要約を作成する用のプロンプト",interactive=True,value=summary_prompt)
     with gr.Column():
-        file = gr.File(label="動画ファイル")
+        file = gr.File(label="動画/音声ファイル")
         excute_Button = gr.Button(value="実行", type="button")    
         excute_Button.click(transcription_excute, [api_key,file,api_list],transcription_out)
     with gr.Column():
